@@ -51,7 +51,6 @@ void JRenderApp::run(){
         const glm::mat4 perspMatrix = interactiveSystem_->getProjMatrix(ratio);;
         const glm::mat4 viewMatrix = interactiveSystem_->getViewMatrix();
 
-
         // Start ImGui frame
         interactiveSystem_->getImguiApp().newFrame();
         
@@ -67,7 +66,7 @@ void JRenderApp::run(){
             GlobalUbo ubo{};
             ubo.projection = perspMatrix;
             ubo.view = viewMatrix;
-            ubo.projection[1][1] *= -1;
+            ubo.projection[1][1] *= -1;  //glm for openGL, y is up, vulkan is opposite side
             ubo.invView = glm::inverse(viewMatrix);
             ubo.camPos = glm::vec3(ubo.invView[3]);
             
@@ -78,14 +77,12 @@ void JRenderApp::run(){
             //     printf("Camera pos: (%.2f, %.2f, %.2f)\n", pos.x, pos.y, pos.z);
             // }
 
-
+            //directly copy to the target place
             memcpy(renderingSystem_->getUniformBufferObjs()[currentFrame]->getBufferMapped(), 
                     &ubo, 
                     sizeof(ubo) );
             // ------------------------------------------------
             
-
-
             renderer_app.beginRender(commandBuffer);
             renderingSystem_->render(commandBuffer, renderer_app.getCurrentFrame(), interactiveSystem_->getUISettings());
 
@@ -93,9 +90,6 @@ void JRenderApp::run(){
 
             renderer_app.endRender(commandBuffer);
             renderer_app.endFrame();
-
-
-
         } 
         else {
             // Frame was skipped (e.g., swapchain recreation), finish ImGui anyway

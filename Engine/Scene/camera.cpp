@@ -35,7 +35,8 @@ JCameraPositioner_Arcball::JCameraPositioner_Arcball (
     x_axis = glm::normalize(  glm::cross(z_axis, y_axis));
 
     pivot_translation_ = glm::inverse(glm::translate(pivot_));
-
+    //opengl rule, camera looking at -z
+    //move camera to eye place, and face to pivot
     translation_ = glm::translate(  glm::vec3(0.f, 0.f, -glm::length(dir))  );
 
     rotation_    = glm::normalize(      
@@ -73,11 +74,6 @@ void JCameraPositioner_Arcball::updateCamera(){
 
 
 void JCameraPositioner_Arcball::pan(const glm::vec2& deltaPos) {
-    // glm::mat4 inv_proj = glm::inverse(projMatrix_);
-
-    // glm::vec4 dxy4 = glm::inverse(projMatrix_) * glm::vec4(deltaPos.x, deltaPos.y, 0, 1);
-
-
     const float zoom_amount = std::abs(translation_[3][2]) * pan_speed_;
     glm::vec4 motion(deltaPos.x*zoom_amount , deltaPos.y*zoom_amount, 0.f, 0.f);
     motion = invViewMatrix_ * motion;
@@ -101,6 +97,16 @@ void JCameraPositioner_Arcball::orbit(glm::vec2 prev_mouse, glm::vec2 cur_mouse)
 }
 
 
+// 缩放
+void JCameraPositioner_Arcball::zoom(glm::vec2 prev_mouse, glm::vec2 cur_mouse) {
+    glm::vec2 deltaPos = cur_mouse - prev_mouse;
+    float zoom_amount = (deltaPos.y + deltaPos.x) * zoom_speed_;
+     
+    const glm::vec3 motion(0.f , 0.f, zoom_amount);  //think in mat4 homogeneous matrix
+    translation_ = glm::translate(motion) * translation_;
+
+    updateCamera();
+}
 
 glm::quat JCameraPositioner_Arcball::screen_to_arcball(const glm::vec2& mousePos){
     const float dist = glm::dot(mousePos, mousePos) * orbit_speed_;
@@ -113,22 +119,6 @@ glm::quat JCameraPositioner_Arcball::screen_to_arcball(const glm::vec2& mousePos
     }
 }
 
-
-
-
-
-
-
-// 缩放
-void JCameraPositioner_Arcball::zoom(glm::vec2 prev_mouse, glm::vec2 cur_mouse) {
-    glm::vec2 deltaPos = cur_mouse - prev_mouse;
-    float zoom_amount = (deltaPos.y + deltaPos.x) * zoom_speed_;
-     
-    const glm::vec3 motion(0.f , 0.f, zoom_amount);  //think in mat4 homogeneous matrix
-    translation_ = glm::translate(motion) * translation_;
-
-    updateCamera();
-}
 
 
 void JCameraPositioner_Arcball::onMouseButton(int button, int action, double x, double y){

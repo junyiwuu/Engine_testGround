@@ -17,9 +17,9 @@ InteractiveSystem::InteractiveSystem(JWindow& window, JDevice& device, const JSw
     device_app(device),
     swapchain_app(swapchain)  ,
     camera_Arcball_positioner(std::make_shared<Scene::JCameraPositioner_Arcball>(
-        glm::vec3(0.0f, 1.0f, -3.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, -3.0f), /*eye*/
+        glm::vec3(0.0f, 0.0f, 0.0f), /*pivot*/
+        glm::vec3(0.0f, 1.0f, 0.0f), /*up*/
         Scene::DragMode::None)),
     camera_Arcball(*camera_Arcball_positioner),
     camera_FPerson_positioner(std::make_shared<Scene::JCameraPositioner_firstPerson>(
@@ -29,15 +29,8 @@ InteractiveSystem::InteractiveSystem(JWindow& window, JDevice& device, const JSw
     camera_FPerson(*camera_FPerson_positioner)
 {
 
-
-
-
     uiSettings = std::make_shared<UI::UISettings>();
     imgui_obj = std::make_unique<JImGui>(device_app, swapchain_app, window_app.getGLFWwindow(), *uiSettings);
-    
-    // assert(&camera_Arcball_positioner == camera_Arcball.debug_getRawPositioner());
-    // std::cout << "Arcball positioner addr: " << &camera_Arcball_positioner
-    //           << ", camera holds: " << camera_Arcball.debug_getRawPositioner() << "\n";
     
 }
 
@@ -51,15 +44,11 @@ InteractiveSystem::~InteractiveSystem(){
 const glm::mat4 InteractiveSystem::getProjMatrix(float ratio){
 
     if(uiSettings->userCam == UI::UserCam::ArcballCamera){
-        // std::cerr << "DEBUG: InteractiveSystem calling arcball getProjMatrix" << std::endl;
         return camera_Arcball.getProjMatrix(ratio);
     }else if(uiSettings->userCam == UI::UserCam::FirstPersonCamera){
-        // std::cerr << "DEBUG: InteractiveSystem calling first-person getProjMatrix" << std::endl;
         return camera_FPerson.getProjMatrix(ratio); 
     }
     
-    // Default fallback to arcball camera
-    // std::cerr << "DEBUG: InteractiveSystem calling arcball getProjMatrix (fallback)" << std::endl;
     return camera_Arcball.getProjMatrix(ratio);
 }
 
