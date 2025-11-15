@@ -29,6 +29,9 @@ jobs:
 
       - name: Install  GLM
         run: sudo apt install -y libglm-dev
+      
+      - name: Install Assimp
+        run: sudo apt install -y libassimp-dev
 
       - name: Build project
         run: sh build.sh
