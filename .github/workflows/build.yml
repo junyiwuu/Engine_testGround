@@ -80,7 +80,7 @@ jobs:
 
       - name: Install glsl
         run: |
-          if [! -f /usr/local/bin/glslc ]; then
+          if ! command -v glslc > /dev/null; then
             sudo apt update
             sudo apt install -y git cmake python3 python3-pip build-essential
             git clone https://github.com/google/shaderc.git
