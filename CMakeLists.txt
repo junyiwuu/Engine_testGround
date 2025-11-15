@@ -36,7 +36,7 @@ else()
   FetchContent_Declare(
     ktx
     GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
-    GIT_TAG v4.4.9
+    GIT_TAG v4.4.0
   )
   set(KTX_FEATURE_TOOLS OFF CACHE BOOL "" FORCE)
   set(KTX_FEATURE_TESTS OFF CACHE BOOL "" FORCE)
