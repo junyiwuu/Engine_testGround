@@ -19,7 +19,7 @@ jobs:
         with:
           submodules: recursive
 
-
+        # for ccache. also need to write in cmake
       - name: Restore shaderc cache
         uses: actions/cache@v3
         with:
@@ -28,7 +28,24 @@ jobs:
           restore-keys: |
             shaderc-${{ runner.os }}-
           
-          # for ccache. also need to write in cmake
+          # restore ktx
+      - name: Restore KTX cache
+        uses: actions/cache@v3
+        with:
+          path: ./_deps/ktx-build  # why this folder
+          key: ktx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            ktx-${{ runner.os }}-
+
+        # download google test
+      - name: Install Google Test
+        run: |
+          mkdir -p external/gtest
+          wget -O external/gtest.tar.gz https://github.com/google/googletest/archive/release-1.12.1.tar.gz
+          tar -xzf external/gtest.tar.gz -C external/gtest --strip-components=1
+
+      - name: Verify Google Test headers
+        run: ls -l /path/to/googletest/include/gtest/gtest.h
 
       - name: Notify repository has been cloned
         run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
@@ -63,11 +80,23 @@ jobs:
             echo "shaderc already installed, skip build"
           fi
 
+
+      # save caches
       - name: Save shaderc cache
         uses: actions/cache@v3
         with:
           path: /usr/local/lib
           key: shaderc-${{ runner.os }}-${{ github.sha }}
+
+      - name: Save KTX cache
+        uses: actions/cache@v3
+        with:
+          path: ./_deps/ktx-build
+          key: ktx-${{ runner.os }}-${{ github.sha }}
+
+      - name: Verify KTX cache
+        run: ls -l ./_deps/ktx-build
+
 
       - name: Install stb_image
         run: |
@@ -81,6 +110,8 @@ jobs:
       - name: Make build.sh executable
         run: chmod +x build.sh
           
+      - name: Check Vulkan SDK version
+        run: vulkaninfo | grep "Vulkan Instance Version"
 
       - name: Build project
         run: sh build.sh

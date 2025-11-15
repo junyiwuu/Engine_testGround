@@ -37,6 +37,8 @@ else()
     ktx
     GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
     GIT_TAG v4.4.0
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/ktx-src
+    BINARY_DIR ${CMAKE_BINARY_DIR}/_deps/ktx-build
   )
   set(KTX_FEATURE_TOOLS OFF CACHE BOOL "" FORCE)
   set(KTX_FEATURE_TESTS OFF CACHE BOOL "" FORCE)
