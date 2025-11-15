@@ -45,6 +45,8 @@ jobs:
           cmake -GNinja ..
           ninja
           sudo ninja install
+          echo "export PATH=/usr/local/bin:$PATH" >> $HOME/.bashrc
+          source $HOME/.bashrc
 
       - name: Build project
         run: sh build.sh
