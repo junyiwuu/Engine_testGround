@@ -124,7 +124,7 @@ target_link_libraries(engine_lib
 )
 target_include_directories(engine_lib PUBLIC ${CMAKE_SOURCE_DIR}/App)
 
-# Main executable
+# Main executable 
 add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/App/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE engine_lib)
 
@@ -145,12 +145,20 @@ include_directories(${CMAKE_SOURCE_DIR}/external/gtest/googletest/include)
 target_include_directories(unit_test PRIVATE ${googletest_SOURCE_DIR}/googletest/include)
 
 # Link Google Test libraries
+# target_link_libraries(unit_test
+#   PRIVATE
+#     GTest::gtest
+#     GTest::gtest_main
+#     engine_lib)
 target_link_libraries(unit_test
   PRIVATE
-    GTest::gtest
-    GTest::gtest_main
-    engine_lib)
+  ${CMAKE_BINARY_DIR}/lib/libgtest.a
+)
 
+
+# message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+# message(STATUS "googletest_SOURCE_DIR: ${googletest_SOURCE_DIR}")
+# message(STATUS "googletest_BINARY_DIR: ${googletest_BINARY_DIR}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined -fno-omit-frame-pointer")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address,undefined")
