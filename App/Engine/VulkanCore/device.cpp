@@ -100,7 +100,15 @@ void JDevice::createInstance(){
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0); //you make this number
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    // appInfo.apiVersion = VK_API_VERSION_1_4;
+    // appInfo.apiVersion = VK_API_VERSION_1_3;
+    #if defined(VK_API_VERSION_1_4)
     appInfo.apiVersion = VK_API_VERSION_1_4;
+    #elif defined(VK_API_VERSION_1_3)
+        appInfo.apiVersion = VK_API_VERSION_1_3;
+    #else
+        #error "Unsupported Vulkan API version"
+    #endif
 
     //create vulkan instance
     VkInstanceCreateInfo createInfo{};
