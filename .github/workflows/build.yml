@@ -44,8 +44,14 @@ jobs:
           wget -O external/gtest.tar.gz https://github.com/google/googletest/archive/release-1.12.1.tar.gz
           tar -xzf external/gtest.tar.gz -C external/gtest --strip-components=1
 
+      - name: List Google Test directory
+        run: ls -R external/gtest
+
       - name: Verify Google Test headers
-        run: ls -l /path/to/googletest/include/gtest/gtest.h
+        run: ls -l external/gtest/include/gtest/gtest.h
+
+
+
 
       - name: Notify repository has been cloned
         run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
