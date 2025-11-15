@@ -136,6 +136,11 @@ include_directories(${CMAKE_SOURCE_DIR}/external/stb)
 # Unit tests
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/App/Engine/VulkanCore/test/*.cpp")
 add_executable(unit_test ${TEST_SOURCES})
+
+# Include Google Test headers
+target_include_directories(unit_test PRIVATE ${googletest_SOURCE_DIR}/googletest/include)
+
+# Link Google Test libraries
 target_link_libraries(unit_test
   PRIVATE
     GTest::gtest
