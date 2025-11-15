@@ -48,7 +48,7 @@ jobs:
         run: ls -R external/gtest
 
       - name: Verify Google Test headers
-        run: ls -l external/gtest/include/gtest/gtest.h
+        run: ls -l external/gtest/googletest/include/gtest/gtest.h
 
 
 
