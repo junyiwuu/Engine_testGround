@@ -18,6 +18,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          path: ~/.ccache
+          key: ccache-${{runner.os}}-${{github.sha}}
+          restore-keys: |
+            ccache-${{runner.os}}-
+          
+          # for ccache. also need to write in cmake
 
       - name: Notify repository has been cloned
         run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
@@ -47,6 +53,12 @@ jobs:
           sudo ninja install
           echo "export PATH=/usr/local/bin:$PATH" >> $HOME/.bashrc
           source $HOME/.bashrc
+
+      - name: Install stb_image
+        run: |
+          mkdir -p external/stb
+          wget -O external/stb/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+          wget -O external/stb/stb_image.cpp https://raw.githubusercontent.com/nothings/stb/master/stb_image.cpp
 
       - name: Build project
         run: sh build.sh
