@@ -32,12 +32,18 @@ find_package(Ktx CONFIG QUIET) # 会找 ktxConfig.cmake。 QUITE会找不到就�
 if(TARGET KTX::ktx)
   set(KTX_TARGET KTX::ktx)
 else()
-  message(STATUS "Using bundled KTX-Software (third_party).")
+  message(STATUS "Downloading KTX-Software with FetchContent.")
+  FetchContent_Declare(
+    ktx
+    GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
+    GIT_TAG v4.4.9
+  )
   set(KTX_FEATURE_TOOLS OFF CACHE BOOL "" FORCE)
   set(KTX_FEATURE_TESTS OFF CACHE BOOL "" FORCE)
-  set(KTX_TARGET ktx)
 
-  add_subdirectory(third_party/KTX-Software EXCLUDE_FROM_ALL) #将这个ktx-software作为子目录加进来。 excludefromall意思是所有target得显式要求才会编
+  FetchContent_MakeAvailable(ktx)
+  set(KTX_TARGET ktx)
+  # add_subdirectory(third_party/KTX-Software EXCLUDE_FROM_ALL) #将这个ktx-software作为子目录加进来。 excludefromall意思是所有target得显式要求才会编
 endif()
 
 
