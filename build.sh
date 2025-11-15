@@ -10,7 +10,6 @@ if [ $# -ge 1 ]; then
         BUILD_TYPE="Debug"
         echo "[ -- ] Building in debug mode"
 
-        echo "Using "
     elif [[ "$arg" == "release" ]]; then
         BUILD_TYPE="Release"
         echo "[ -- ] Building in release mode"

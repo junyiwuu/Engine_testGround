@@ -18,10 +18,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          path: ~/.ccache
-          key: ccache-${{runner.os}}-${{github.sha}}
+
+
+      - name: Restore shaderc cache
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/lib
+          key: shaderc-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{runner.os}}-
+            shaderc-${{ runner.os }}-
           
           # for ccache. also need to write in cmake
 
@@ -41,23 +46,39 @@ jobs:
 
       - name: Install glsl
         run: |
-          sudo apt update
-          sudo apt install -y git cmake python3 python3-pip build-essential
-          git clone https://github.com/google/shaderc.git
-          cd shaderc
-          python3 ./utils/git-sync-deps
-          mkdir build
-          cd build
-          cmake -GNinja ..
-          ninja
-          sudo ninja install
-          echo "export PATH=/usr/local/bin:$PATH" >> $HOME/.bashrc
-          source $HOME/.bashrc
+          if [! -f /usr/local/bin/glslc ]; then
+            sudo apt update
+            sudo apt install -y git cmake python3 python3-pip build-essential
+            git clone https://github.com/google/shaderc.git
+            cd shaderc
+            python3 ./utils/git-sync-deps
+            mkdir build
+            cd build
+            cmake -GNinja ..
+            ninja
+            sudo ninja install
+            echo "export PATH=/usr/local/bin:$PATH" >> $HOME/.bashrc
+            source $HOME/.bashrc
+          else
+            echo "shaderc already installed, skip build"
+          fi
+
+      - name: Save shaderc cache
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/lib
+          key: shaderc-${{ runner.os }}-${{ github.sha }}
 
       - name: Install stb_image
         run: |
           mkdir -p external/stb
           wget -O external/stb/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+
+      - name: Check build.sh exists
+        run: ls -l build.sh
+
+      - name: Make build.sh executable
+        run: chmod +x build.sh
           
 
       - name: Build project

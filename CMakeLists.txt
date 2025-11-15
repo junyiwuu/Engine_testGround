@@ -129,7 +129,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE engine_lib)
 # Include stb_image
 include_directories(${CMAKE_SOURCE_DIR}/external/stb)
 # add_library(stb_image external/stb/stb_image.cpp)
-target_link_libraries(${PROJECT_NAME} stb_image)
+target_link_libraries(${PROJECT_NAME} PRIVATE stb_image)
 
 # Unit tests
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/App/Engine/VulkanCore/test/*.cpp")
@@ -161,9 +161,16 @@ add_dependencies(JRenderer compile_shaders)
 
 
 
-export CCACHE_DIR=~/.ccache
-export CC = "ccache gcc"
-export CCX="ccache g++"
+# configuration for ccache
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+endif()
+
+# export CCACHE_DIR=~/.ccache
+# export CC = "ccache gcc"
+# export CCX="ccache g++"
 
 
 
