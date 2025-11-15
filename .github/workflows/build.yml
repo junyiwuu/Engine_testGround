@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p external/stb
           wget -O external/stb/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
-          wget -O external/stb/stb_image.cpp https://raw.githubusercontent.com/nothings/stb/master/stb_image.cpp
+          
 
       - name: Build project
         run: sh build.sh
