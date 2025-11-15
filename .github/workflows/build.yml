@@ -32,7 +32,7 @@ jobs:
       - name: Restore KTX cache
         uses: actions/cache@v3
         with:
-          path: ./_deps/ktx-build  # why this folder
+          path: ./_deps/ktx-build           # why this folder
           key: ktx-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             ktx-${{ runner.os }}-
@@ -94,14 +94,6 @@ jobs:
           path: /usr/local/lib
           key: shaderc-${{ runner.os }}-${{ github.sha }}
 
-      - name: Save KTX cache
-        uses: actions/cache@v3
-        with:
-          path: ./_deps/ktx-build
-          key: ktx-${{ runner.os }}-${{ github.sha }}
-
-      - name: Verify KTX cache
-        run: ls -l ./_deps/ktx-build
 
 
       - name: Install stb_image
@@ -120,4 +112,32 @@ jobs:
         run: vulkaninfo | grep "Vulkan Instance Version"
 
       - name: Build project
+        # run: |
+        #   mkdir -p build
+        #   cd build
+        #   cmake .. -DCMAKE_BUILD_TYPE=Release
+        #   make
+        
         run: sh build.sh
+
+
+
+      - name: Save KTX cache
+        uses: actions/cache@v3
+        with:
+          path: ./_deps/ktx-build
+          key: ktx-${{ runner.os }}-${{ github.sha }}
+
+      - name: Verify KTX cache
+        run: ls -l ./_deps/ktx-build
+
+
+
+
+
+
+
+
+
+
+# I have to use build.yml to download these things, so can do ccache      

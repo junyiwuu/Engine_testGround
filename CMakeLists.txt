@@ -131,7 +131,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE engine_lib)
 # Include stb_image
 include_directories(${CMAKE_SOURCE_DIR}/external/stb)
 # add_library(stb_image external/stb/stb_image.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE stb_image)
+# target_link_libraries(${PROJECT_NAME} PRIVATE stb_image)
 
 # Unit tests
 file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/App/Engine/VulkanCore/test/*.cpp")
