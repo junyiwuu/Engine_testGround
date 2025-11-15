@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(JRenderer VERSION 1.0 LANGUAGES CXX)
+project(JRenderer VERSION 1.0 LANGUAGES C CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -16,7 +16,15 @@ include(FetchContent)
 
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
+
 # set(Ktx_DIR "/usr/local/lib/cmake/ktx" CACHE PATH "Path to ktxConfig.cmake directory")
+
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/release-1.12.1.tar.gz
+)
+FetchContent_MakeAvailable(googletest)
+
 
 
 find_package(Ktx CONFIG QUIET) # 会找 ktxConfig.cmake。 QUITE会找不到就进入ifelse branch，如果改成required会直接报错
@@ -76,24 +84,28 @@ endif()
 
 
 
-file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/Engine/*.cpp" "${CMAKE_SOURCE_DIR}/Engine/*.hpp")
+
+
 file(GLOB IMGUI_SRC
         third_party/imgui/imgui*.cpp
         third_party/imgui/backends/imgui_impl_glfw.cpp
         third_party/imgui/backends/imgui_impl_vulkan.cpp)
+
 add_library(imgui ${IMGUI_SRC})
 target_include_directories(imgui PUBLIC
                                 ${CMAKE_SOURCE_DIR}/third_party/imgui
                                 ${CMAKE_SOURCE_DIR}/third_party/imgui/backends)
-target_link_libraries(imgui PUBLIC 
+target_link_libraries(imgui PUBLIC
                                 glfw
                                 Vulkan::Vulkan )
 
+file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/App/Engine/*.cpp" "${CMAKE_SOURCE_DIR}/App/Engine/*.hpp")
+list(FILTER SOURCES EXCLUDE REGEX ".*_test.cpp")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_link_libraries(${PROJECT_NAME}
-  PRIVATE
+# Create engine library
+add_library(engine_lib ${SOURCES})
+target_link_libraries(engine_lib
+  PUBLIC
     Vulkan::Vulkan
     glfw
     imgui
@@ -102,8 +114,20 @@ target_link_libraries(${PROJECT_NAME}
     ${KTX_TARGET}
     ${X11_LIBRARIES}
 )
+target_include_directories(engine_lib PUBLIC ${CMAKE_SOURCE_DIR}/App)
 
+# Main executable
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/App/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE engine_lib)
 
+# Unit tests
+file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/App/Engine/VulkanCore/test/*.cpp")
+add_executable(unit_test ${TEST_SOURCES})
+target_link_libraries(unit_test
+  PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    engine_lib)
 
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined -fno-omit-frame-pointer")

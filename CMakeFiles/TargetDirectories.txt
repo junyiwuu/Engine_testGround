@@ -1,0 +1,5 @@
+/home/j/projects/playground/test/vulkanTriangle_old/CMakeFiles/imgui.dir
+/home/j/projects/playground/test/vulkanTriangle_old/CMakeFiles/JRenderer.dir
+/home/j/projects/playground/test/vulkanTriangle_old/CMakeFiles/compile_shaders.dir
+/home/j/projects/playground/test/vulkanTriangle_old/CMakeFiles/edit_cache.dir
+/home/j/projects/playground/test/vulkanTriangle_old/CMakeFiles/rebuild_cache.dir
