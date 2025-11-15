@@ -34,7 +34,9 @@ jobs:
         run: sudo apt install -y libassimp-dev
 
       - name: Install glsl
-        run: sudo apt install -y shaderc
+        run: |
+          sudo apt update
+          sudo apt install -y shaderc-tools
 
       - name: Build project
         run: sh build.sh
