@@ -14,6 +14,12 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader
           vulkan-use-cache: true
 
+      - name: Verify Vulkan SDK installation
+        run: ls -R $VULKAN_SDK
+
+      - name: Check vulkaninfo command
+        run: which vulkaninfo
+
       - name: Check out repository code                     # official checkout, pull current code to runner 
         uses: actions/checkout@v4
         with:
