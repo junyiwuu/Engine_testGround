@@ -73,6 +73,7 @@ jobs:
         run: |
           mkdir -p external/stb
           wget -O external/stb/stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+          wget -O external/stb/stb_image_write.h https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h
 
       - name: Check build.sh exists
         run: ls -l build.sh
