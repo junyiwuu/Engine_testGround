@@ -112,6 +112,10 @@ void RenderingSystem::loadPrecomputedResources(){
 
 }
 
+// brdf lut是什么
+// 在pbr种，如果让金属塑料等材料在IBL下呈现正确的高光，必须计算一个复杂的积分，过于昂贵，所以提前计算，成为一个二维的llookup table
+// x轴是n*v(视线与法线夹角)。 y轴是roughness粗糙度， 所以是根据n*v来查找roughness
+// 用的是一个storage buffer.
 
 void RenderingSystem::createBRDFLUT(){
 
@@ -125,7 +129,10 @@ void RenderingSystem::createBRDFLUT(){
    brdfPushConstant.BRDF_H = brdf_h;
    brdfPushConstant.BRDF_W = brdf_w;
    brdfPushConstant.bufferAddr = storageBuffer_->getBufferAddress();
+   // 在下面vkcmdPushConstants的时候带上这个pushconstant的内容
 
+
+    // 用commandbuffer进行处理
    JCommandBuffer commandBuffer(device_app, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
    commandBuffer.beginSingleTimeCommands();
    
@@ -133,13 +140,16 @@ void RenderingSystem::createBRDFLUT(){
    vkCmdPushConstants(commandBuffer.getCommandBuffer(), brdfPipelineLayout_app->getPipelineLayout(), 
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, 
                        sizeof(brdfPushConstant), &brdfPushConstant);
+
+    // vkCmdDispatch是体积哦啊一次computer shader 执行的指令，用来在gpu上启动并行计算工作负载，是compute pipeline的入口，用来启动大量的workgroup
+    // vkCmdDispatch运行compute pipeline， 完全不走rasterization
+    // vkcmddraw运行graphic pipeline
    vkCmdDispatch(commandBuffer.getCommandBuffer(), (brdf_w / 16), (brdf_h / 16), 1);
    //用graphicqueue来计算compute的东西
    commandBuffer.endSingleTimeCommands(device_app.graphicsQueue());
 
 
-   //write to ktx file
-   
+   //write to ktx file。针对brdf lut步生成mipmap
    ktxTextureCreateInfo ktxCreateInfo{};
    ktxCreateInfo.vkFormat         = VK_FORMAT_R16G16B16A16_SFLOAT;
    ktxCreateInfo.baseWidth        = brdf_w;
@@ -156,15 +166,16 @@ void RenderingSystem::createBRDFLUT(){
    if (ktxTexture2_Create(&ktxCreateInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &lutTexture) != KTX_SUCCESS){
        throw std::runtime_error("BRDF LUT ktx file create failed!");   };
        
-    
+    // 创建一个staging buffer,host visible的
     JBuffer stagingBuffer(device_app, storageBuffer_->getSize(),   // in gpu but cpu can access
                 VK_BUFFER_USAGE_TRANSFER_DST_BIT, 
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT|VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
+    // 把storage buffer的内容复制到staging buffer里面，本质也是一个command运行的
     util::copyBuffer(storageBuffer_->buffer() , stagingBuffer.buffer(),  storageBuffer_->getSize(), 
             device_app.device(), device_app.getCommandPool(), device_app.graphicsQueue()); 
 
-    stagingBuffer.map();    
+    stagingBuffer.map();    //在cpu上创建指针
 
     const ktx_size_t imageSize = static_cast<ktx_size_t>(brdf_w) * brdf_h * 4 * sizeof(uint16_t);
     if(ktxTexture_SetImageFromMemory(ktxTexture(lutTexture), /*level*/0, /*layer*/0, /*faceSlice*/0,
@@ -178,7 +189,26 @@ void RenderingSystem::createBRDFLUT(){
     ktxTexture2_Destroy(lutTexture);
 
     stagingBuffer.unmap();
+
+    // 在 vulkan的设计种，gpu的内存device local通常是高性能的专用内存，cpu无法直接访问，
+    // 但如果我想要从gpu的内存中读取数据到cpu里面，例如保存文件，那么就需要staging buffer
+    // staging buffer是host visible的缓冲区域，所以cpu可直接访问
+    // 数据从gpu的device local内存复制到staging buffer后，cpu就通过映射的地址访问这块内存
+
 }
+
+
+
+
+// descirptor pool (have a large enough pool)
+//
+// use descriptor allocator to actually create the pool
+// 
+// descriptor set layout
+// we have several,
+//              uniform buffer, will be viewed by vertex and shader 
+//              global static for envmap, which is image sampler. only available for fragment shader
+//              for pbr one, also image sampler, only for fragment shader
 
 
 
@@ -232,17 +262,22 @@ void RenderingSystem::createDescriptorResources(){
 
     descriptorSets_glob.reserve(Global::MAX_FRAMES_IN_FLIGHT);
     //assign ubo descriptor set
+    // 预留空间，大小就是MAX_FRAMES_IN_FLIGHT
     uniformBuffer_objs.reserve(Global::MAX_FRAMES_IN_FLIGHT);
+    // 创建一个writer
     JDescriptorWriter writer_glob{*descriptorSetLayout_glob, descriptorAllocator_obj->getDescriptorPool() };  
+
+    // 为每一帧创建一个ubo和对应的descriptor set，并写入
     for(size_t i =0; i< Global::MAX_FRAMES_IN_FLIGHT; ++i)
     {
         //create uniform buffer
         auto buffer = std::make_unique<JBuffer>(
             device_app,
-            sizeof(GlobalUbo),
+            sizeof(GlobalUbo),                             // globalUbo 是一个struct,就是一个数据结构的大小，保证是cpu可以看到，并且保证缓冲内存是连续的，便于cpu和gpu同步
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        buffer->map();
+        buffer->map();                                      // 是gpu分配的内存映射到cpu的虚拟地址空间（本来是gpu上
+                                                            //map的意思是，讲gpu的内存直接暴露给cpu，使cpu可以通过一个指针访问这块gpu的内存
         uniformBuffer_objs.emplace_back( std::move(buffer) );
 
         auto& ubo = *uniformBuffer_objs.back();
@@ -261,6 +296,7 @@ void RenderingSystem::createDescriptorResources(){
 void RenderingSystem::createPipelineResources(){
     //compute pipeline -- for BRDF LUT
     auto code = util::readFile("../shaders/BRDF_LUT.comp.spv");
+    // vkshadermodule是vulkan api中用于封装gpu可执行着色器代码的对象
     brdfComputeShader = std::make_unique<JShaderModule>(device_app.device(), code);
 
     VkPushConstantRange brdf_pushConstantRange{};
@@ -495,20 +531,25 @@ void RenderingSystem::loadAssets(){
 
 
 void RenderingSystem::loadEnvMaps(){
-    std::shared_ptr<JCubemap> skybox_texture = std::make_shared<JCubemap>("../assets/rustig_koppie_1k.hdr", device_app);
-    // std::shared_ptr<JCubemap> skybox_texture = std::make_shared<JCubemap>("../assets/park_music_stage_2k.hdr", device_app);
-    cubemaps_["skybox"] = skybox_texture;
+    if(cubemaploaded){
+        return;
+    }
+    try{
 
+        std::shared_ptr<JCubemap> skybox_texture = std::make_shared<JCubemap>("../assets/rustig_koppie_1k.hdr", device_app);
+        // std::shared_ptr<JCubemap> skybox_texture = std::make_shared<JCubemap>("../assets/park_music_stage_2k.hdr", device_app);
+        cubemaps_["skybox"] = skybox_texture;
 
-
-    auto skybox = Scene::JEnvMap::createEnvMap();
-    skybox.texture = cubemaps_["skybox"];
-    skybox.transform.translation = {0.f, 0.f, 0.f};
-    skybox.transform.scale = {1.f, 1.f, 1.f};
-    skybox.transform.rotation = {-0.0f, 0.f, 0.0f};
-    sceneEnvMap.emplace(skybox.getId(), std::move(skybox));
-
-
+        auto skybox = Scene::JEnvMap::createEnvMap();
+        skybox.texture = cubemaps_["skybox"];
+        skybox.transform.translation = {0.f, 0.f, 0.f};
+        skybox.transform.scale = {1.f, 1.f, 1.f};
+        skybox.transform.rotation = {-0.0f, 0.f, 0.0f};
+        sceneEnvMap.emplace(skybox.getId(), std::move(skybox));
+        cubemaploaded = true;
+    }catch(const std::exception& e){
+        std::cerr << "failed to load cubemap" << e.what() << std::endl;
+    }
 
 }
 

@@ -74,6 +74,7 @@
         "csignal": "cpp",
         "strstream": "cpp",
         "valarray": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "forward_list": "cpp"
     }
 }

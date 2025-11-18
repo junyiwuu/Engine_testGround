@@ -122,8 +122,9 @@ private:
 
     std::unique_ptr<PrecomputeSystem> precompSystem_app;
 
-
-
+    // avoid cubemap keep load repeately
+    bool cubemaploaded = false;
+    
 
     bool lastAlbedoTexState = false;
     bool lastRoughnessTexState = false;

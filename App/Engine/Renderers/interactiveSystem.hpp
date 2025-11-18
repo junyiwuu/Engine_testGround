@@ -19,8 +19,6 @@ public:
     InteractiveSystem(JWindow& window, JDevice& device, const JSwapchain& swapchain);
     ~InteractiveSystem();
 
-
-    void registerGlfwCallbacks();
     JImGui& getImguiApp()                           {return *imgui_obj;}
     Scene::JCamera& getArcballCamera() {return camera_Arcball;}
     

@@ -206,6 +206,7 @@ VkExtent2D JSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
             static_cast<uint32_t>(height)
         };
 
+        // 就算拿到了framebuffer的大小，但是可能还受gpu的一些限制，要考虑这部分
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
         actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
@@ -213,6 +214,12 @@ VkExtent2D JSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
     }
 }
 
+
+
+// | 项目                   | 由谁决定                           | 作用                        |
+// | --------------------- | --------------------------------- | ------------------------   | 
+// | GLFW framebuffer size | OS / window manager + DPI scaling | 给你“愿望的像素尺寸”          |
+// | **Swapchain extent**  | **GPU 硬件能力决定**                | **最终实际渲染图像的像素尺寸** |
 
 
 

@@ -66,8 +66,6 @@ private:
     void createDepthResources() ;
     void createColorResources();
 
-
-    void createSyncObjects();
     
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 

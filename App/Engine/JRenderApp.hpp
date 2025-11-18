@@ -62,7 +62,7 @@ public:
 
 
 private:
-  //window
+  // 前三个和JRenderApp一定一起创建一起销毁。是最基础的成员
   JWindow window_app{WIDTH, HEIGHT, "vulkan"};
   JDevice device_app{window_app};
   Renderer renderer_app{window_app, device_app};

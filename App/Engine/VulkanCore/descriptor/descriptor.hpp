@@ -93,8 +93,8 @@ class JDescriptorWriter{
 public:
 
     JDescriptorWriter(JDescriptorSetLayout& descriptorSetLayout, VkDescriptorPool descriptorPool);
-    JDescriptorWriter(const JDescriptorWriter&) = delete;
-    JDescriptorWriter& operator=(const JDescriptorWriter&) = delete;
+    JDescriptorWriter(const JDescriptorWriter&) = delete;                               //禁止拷贝
+    JDescriptorWriter& operator=(const JDescriptorWriter&) = delete;                    //禁止赋值
 
 
     JDescriptorWriter& writeBuffer(uint32_t binding, const VkDescriptorBufferInfo* bufferInfo);

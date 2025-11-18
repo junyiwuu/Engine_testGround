@@ -57,11 +57,11 @@ void AppContext::registerAllCallbacks(GLFWwindow* window) {
     // Set this AppContext as the user pointer
     glfwSetWindowUserPointer(window, this);
     
-    // Register all callbacks
-    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    // Register all callbacks 
+    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);         //第二个xxxCallback相当于一个function--function pointer
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
-    glfwSetKeyCallback(window, keyCallback);
+    glfwSetKeyCallback(window, keyCallback);  
     glfwSetCharCallback(window, charCallback);        //register character, you input stuff
     glfwSetScrollCallback(window, scrollCallback);     // register scroll
 }

@@ -41,8 +41,26 @@ void JRenderApp::run(){
 
 
 
-    while (!glfwWindowShouldClose(window_app.getGLFWwindow())) {
+    while (!glfwWindowShouldClose(window_app.getGLFWwindow())) {  //取反，只要窗口没关闭
         glfwPollEvents(); // 遍历所有的callback
+
+
+        //进行了这些callback
+    // // AppContext implementation
+    // void AppContext::registerAllCallbacks(GLFWwindow* window) {
+    // // Set this AppContext as the user pointer
+    // glfwSetWindowUserPointer(window, this);
+    
+    // // Register all callbacks 
+    // glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    // glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    // glfwSetCursorPosCallback(window, cursorPosCallback);
+    // glfwSetKeyCallback(window, keyCallback);
+    // glfwSetCharCallback(window, charCallback);        //register character, you input stuff
+    // glfwSetScrollCallback(window, scrollCallback);     // register scroll
+
+
+
         
         const float ratio = renderer_app.getSwapchainImageAspectRatio();
         // std::cout << "DEBUG:: current ratio" << ratio <<std::endl;

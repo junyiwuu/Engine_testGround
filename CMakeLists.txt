@@ -145,15 +145,15 @@ include_directories(${CMAKE_SOURCE_DIR}/external/gtest/googletest/include)
 target_include_directories(unit_test PRIVATE ${googletest_SOURCE_DIR}/googletest/include)
 
 # Link Google Test libraries
-# target_link_libraries(unit_test
-#   PRIVATE
-#     GTest::gtest
-#     GTest::gtest_main
-#     engine_lib)
 target_link_libraries(unit_test
   PRIVATE
-  ${CMAKE_BINARY_DIR}/lib/libgtest.a
-)
+    GTest::gtest
+    GTest::gtest_main
+    engine_lib)
+# target_link_libraries(unit_test
+#   PRIVATE
+#   ${CMAKE_BINARY_DIR}/lib/libgtest.a
+# )
 
 
 # message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
